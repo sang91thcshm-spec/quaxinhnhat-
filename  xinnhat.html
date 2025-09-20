@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>山下の誕生日</title>
+<style>
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  overflow: hidden;
+  height: 100vh;
+  position: relative;
+}
+
+/* Container */
+.container {
+  position: absolute; inset:0;
+  display: flex; justify-content: center; align-items: center;
+  flex-direction: column;
+  z-index: 2;
+}
+
+/* Login Page */
+#loginPage {
+  background: rgba(255,255,255,0.2);
+  padding: 20px 40px;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 30px rgba(255,255,255,0.5);
+  text-align: center;
+}
+.display {
+  font-size: 28px;
+  letter-spacing: 10px;
+  margin: 20px 0;
+  color: white;
+  text-shadow: 0 0 15px #fff;
+}
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 12px;
+}
+.btn {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  border: none;
+  background: radial-gradient(circle,#fff,#ffd1d1);
+  font-size: 26px; font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.btn:hover {
+  transform: scale(1.1);SS
+  box-shadow: 0 0 20px #fff,0 0 30px pink;
+}
+.actions { margin-top: 15px; }
+.actions button {
+  margin: 5px; padding: 8px 14px;
+  border: none; border-radius: 12px;
+  background: #ff5c8a; color: #fff;
+  cursor: pointer; font-weight: bold;
+}
+.actions button:hover { background: #ff2e63; box-shadow: 0 0 15px #fff; }
+
+/* Success Page */
+#successPage {
+  display:none; flex-direction: column;
+  color: #f7f7f7; text-align: center;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+h1 {
+  font-size: 60px;
+  text-shadow: 0 0 20px #ff4da6, 0 0 40px #ff4da6, 0 0 60px #ff4da6;
+  animation: glow 2s infinite alternate;
+  margin: 0;
+}
+@keyframes glow {
+  from { text-shadow: 0 0 10px #ff4da6, 0 0 20px #ff4da6; }
+  to { text-shadow: 0 0 30px #ff99cc, 0 0 50px #ff99cc; }
+}
+
+/* Chữ バカ */
+.finalWord {
+  display: none;
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 300px;
+  font-weight: bold;
+  color: #ff0000;
+  text-shadow: 0 0 30px #fff, 0 0 60px #ff0000;
+  animation: pop 2s ease-out;
+  z-index: 4;
+}
+@keyframes pop {
+  0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+/* Avatar nhịp tim */
+.smallImg {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid white;
+  box-shadow: 0 0 20px rgba(255,255,255,0.8);
+  animation: heartbeat 2s infinite;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  z-index: 3;
+}
+.smallImg:hover {
+  transform: scale(1.2) rotate(5deg);
+  box-shadow: 0 0 40px rgb(255, 255, 255);
+  animation: none;
+}
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  25% { transform: scale(1.05); }
+  50% { transform: scale(0.95); }
+  75% { transform: scale(1.05); }
+}
+
+/* Canvas pháo hoa */
+canvas { position: absolute; inset:0; pointer-events:none; z-index:1; }
+/* Logo brand */
+.brand {
+  position: absolute;
+  bottom: 10px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 18px;
+  color: rgb(10, 10, 10);
+  text-shadow: 0 0 10px #030303;
+  opacity: 0.7;
+}
+/* Mưa icon */
+.falling {
+  position: fixed;
+  top: -50px;
+  font-size: 24px;
+  animation: fall linear forwards;
+  z-index:1;
+  opacity: 0.9;
+}
+@keyframes fall {
+  to { transform: translateY(110vh) rotate(360deg); opacity:0.8; }
+}
+</style>
+</head>
+<body>
+
+<!-- Video background -->
+<video id="bgVideo" autoplay loop muted playsinline style="position:fixed;right:0;bottom:0;min-width:100vw;min-height:100vh;width:auto;height:auto;z-index:-1;object-fit:cover;">
+  <source src="background.mp4" type="video/mp4">
+  Trình duyệt của bạn không hỗ trợ video.
+</video>
+
+<!-- Login Page -->
+<div class="container" id="loginPage">
+  <div id="bakaWrong" style="display:none;position:fixed;top:50%;right:5vw;transform:translateY(-50%);font-size:100px;font-weight:bold;color:#ff0000;text-shadow:0 0 30px #fff,0 0 60px #ff0000;z-index:1000;">馬鹿</div>
+    <div style="display: flex; align-items: center; justify-content: center; width: 100vw; min-height: 60vh;">
+      <div style="position: relative; width: 190px; height: 190px; margin-right: 40px; display: flex; align-items: center; justify-content: center;">
+        <img src="476140057_1651910442876358_2041193598593338030_n.jpg" alt="Ảnh bên trái" style="width: 170px; height: 170px; object-fit: cover; border-radius: 50%; box-shadow: 0 0 18px #fff; border: 4px solid #fff;">
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+        <h2 style="color:rgb(12, 12, 12);text-shadow:0 0 15px #0c0c0c;">パスワードを入力してください</h2>
+        <div class="display" id="display">********</div>
+        <div class="keypad" id="keypad"></div>
+        <div class="actions">
+          <button onclick="resetInput()">Xóa</button>
+        </div>
+      </div>
+    </div>
+</div>
+
+<!-- Success Page -->
+<div class="container" id="successPage">
+  <h1>🎉お誕生日おめでとうございます🎂</h1>
+  <div id="baka" class="finalWord">バカ</div>
+  <div class="brand">xancute</div>
+  <img src="476140057_1651910442876358_2041193598593338030_n.jpg" class="smallImg">
+</div>
+
+<!-- Canvas pháo hoa -->
+<canvas id="fireworks"></canvas>
+
+<script>
+// Mật khẩu
+let input="";
+const password="19960929"; 
+const display=document.getElementById("display");
+
+// Bàn phím
+function buildPad(){
+  const pad=document.getElementById("keypad");
+  for(let i=1;i<=9;i++) pad.appendChild(makeKey(i));
+  pad.appendChild(document.createElement("div"));
+  pad.appendChild(makeKey(0));
+  pad.appendChild(document.createElement("div"));
+}
+function makeKey(n){
+  const b=document.createElement("button");
+  b.className="btn"; b.textContent=n;
+  b.onclick=()=>{ if(input.length<8){ input+=n; updateDisplay(); checkPwd(); } };
+  return b;
+}
+function updateDisplay(){ display.textContent=input.padEnd(8,"*"); }
+function resetInput(){ input=""; updateDisplay(); }
+function checkPwd(){
+  if(input.length>=8){
+    if(input===password){ showSuccess(); }
+    else {
+      // Hiện chữ 馬鹿 to trên màn hình
+      const bakaDiv = document.getElementById("bakaWrong");
+      bakaDiv.style.display = "block";
+      setTimeout(()=>{ bakaDiv.style.display = "none"; }, 1200);
+      display.animate([{transform:"translateX(-6px)"},{transform:"translateX(6px)"},{transform:"translateX(0)"}],{duration:300});
+      resetInput();
+    }
+  }
+}
+
+// Hiện trang chúc mừng
+function showSuccess(){
+  document.getElementById("loginPage").style.display="none";
+  document.getElementById("successPage").style.display="flex";
+  loopFireworks();
+  rainIcons();
+  // Hiện chữ バカ sau 2s và ẩn chữ Happy Birthday
+  setTimeout(()=>{
+    document.getElementById("baka").style.display="block";
+    document.querySelector("#successPage h1").style.display="none";
+  },40000);
+}
+const canvas=document.getElementById("fireworks");
+const ctx=canvas.getContext("2d");
+canvas.width=innerWidth; canvas.height=innerHeight;
+
+class Firework {
+  constructor() {
+    this.x = Math.random() * canvas.width;
+    this.y = canvas.height;
+    this.sx = this.x;
+    this.sy = this.y;
+    this.tx = Math.random() * canvas.width;
+    this.ty = Math.random() * canvas.height / 2;
+    this.distanceToTarget = Math.sqrt((this.tx - this.sx) ** 2 + (this.ty - this.sy) ** 2);
+    this.distanceTraveled = 0;
+    this.coordinates = [];
+    for(let i=0;i<3;i++) this.coordinates.push([this.x,this.y]);
+    this.angle = Math.atan2(this.ty - this.sy, this.tx - this.sx);
+    this.speed = 5; this.acceleration = 1.05;
+    this.brightness = Math.random()*50+50;
+  }
+  update(index) {
+    this.coordinates.pop();
+    this.coordinates.unshift([this.x,this.y]);
+    this.speed *= this.acceleration;
+    let vx=Math.cos(this.angle)*this.speed;
+    let vy=Math.sin(this.angle)*this.speed;
+    this.distanceTraveled = Math.sqrt((this.x - this.sx)**2 + (this.y-this.sy)**2);
+    if(this.distanceTraveled >= this.distanceToTarget){
+      createParticles(this.tx,this.ty);
+      fireworks.splice(index,1);
+    } else { this.x+=vx; this.y+=vy; }
+  }
+  draw(){
+    ctx.beginPath();
+    ctx.moveTo(this.coordinates[this.coordinates.length-1][0],this.coordinates[this.coordinates.length-1][1]);
+    ctx.lineTo(this.x,this.y);
+    ctx.strokeStyle="hsl("+this.brightness+",100%,50%)";
+    ctx.stroke();
+  }
+}
+
+class Particle {
+  constructor(x,y){
+    this.x=x; this.y=y; this.coordinates=[];
+    for(let i=0;i<5;i++) this.coordinates.push([this.x,this.y]);
+    this.angle=Math.random()*2*Math.PI;
+    this.speed=Math.random()*10+1;
+    this.friction=0.95; this.gravity=1;
+    this.hue=Math.random()*360;
+    this.brightness=Math.random()*50+50;
+    this.alpha=1;
+    this.decay=Math.random()*0.015+0.003;
+  }
+  update(index){
+    this.coordinates.pop(); this.coordinates.unshift([this.x,this.y]);
+    this.speed*=this.friction;
+    this.x+=Math.cos(this.angle)*this.speed;
+    this.y+=Math.sin(this.angle)*this.speed+this.gravity;
+    this.alpha-=this.decay;
+    if(this.alpha<=0.1) particles.splice(index,1);
+  }
+  draw(){
+    ctx.beginPath();
+    ctx.moveTo(this.coordinates[this.coordinates.length-1][0],this.coordinates[this.coordinates.length-1][1]);
+    ctx.lineTo(this.x,this.y);
+    ctx.strokeStyle="hsla("+this.hue+",100%,"+this.brightness+"%,"+this.alpha+")";
+    ctx.stroke();
+  }
+}
+
+let fireworks=[]; let particles=[];
+function createParticles(x,y){
+  for(let i=0;i<100;i++) particles.push(new Particle(x,y));
+}
+
+function loopFireworks(){
+  function loop(){
+    requestAnimationFrame(loop);
+    ctx.globalCompositeOperation="destination-out";
+    ctx.fillStyle="rgba(0,0,0,0.5)";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.globalCompositeOperation="lighter";
+    for(let i=fireworks.length-1;i>=0;i--){ fireworks[i].draw(); fireworks[i].update(i); }
+    for(let i=particles.length-1;i>=0;i--){ particles[i].draw(); particles[i].update(i); }
+    if(Math.random()<0.05) fireworks.push(new Firework());
+  }
+  loop();
+}
+
+// Mưa trái tim / bánh kem
+function rainIcons(){
+  const icons=["❤️","💖","🎂","💝","💕"];
+  setInterval(()=>{
+    const icon=document.createElement("div");
+    icon.className="falling";
+    icon.textContent=icons[Math.floor(Math.random()*icons.length)];
+    icon.style.left=Math.random()*100+"vw";
+    icon.style.fontSize=(20+Math.random()*20)+"px";
+    icon.style.animationDuration=(2+Math.random()*3)+"s";
+    document.body.appendChild(icon);
+    setTimeout(()=>icon.remove(),5000);
+  },150);
+}
+
+// Init
+buildPad(); updateDisplay();
+</script>
+</body>
+</html>
